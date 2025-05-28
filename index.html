@@ -1,47 +1,1311 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FenixZone RolePlay SV1</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <script defer src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
-  <script defer src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js"></script>
-  <script defer src="firebase-init.js"></script>
-  <script defer src="auth.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FenixZone RolePlay SV1</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(90deg, #00a2e8 0%, #0077be 100%);
+            padding: 1rem 0;
+            box-shadow: 0 4px 15px rgba(0, 162, 232, 0.3);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
+        }
+
+        .logo-text h1 {
+            font-size: 28px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .logo-text p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .server-stats {
+            text-align: right;
+        }
+
+        .players-online {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4ade80;
+        }
+
+        .server-info {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        /* Navigation */
+        .nav-tabs {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid rgba(0, 162, 232, 0.3);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            padding: 0 1rem;
+        }
+
+        .nav-tab {
+            padding: 15px 25px;
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .nav-tab:hover {
+            background: rgba(0, 162, 232, 0.2);
+            border-bottom-color: #00a2e8;
+        }
+
+        .nav-tab.active {
+            background: rgba(0, 162, 232, 0.3);
+            border-bottom-color: #00a2e8;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(0, 162, 232, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .card h3 {
+            color: #00a2e8;
+            margin-bottom: 1rem;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Page Content */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Home Page */
+        .hero-banner {
+            background: linear-gradient(45deg, #00a2e8, #0077be);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 162, 232, 0.4);
+        }
+
+        .hero-banner h2 {
+            font-size: 32px;
+            margin-bottom: 1rem;
+        }
+
+        .hero-banner p {
+            font-size: 18px;
+            opacity: 0.9;
+            margin-bottom: 1.5rem;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #4ade80, #22c55e);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(74, 222, 128, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #00a2e8;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(0, 162, 232, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #00a2e8;
+            box-shadow: 0 0 0 3px rgba(0, 162, 232, 0.2);
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Character Creation */
+        .character-preview {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .character-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #00a2e8, #0077be);
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: white;
+        }
+
+        .skin-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .skin-option {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            background: linear-gradient(45deg, #00a2e8, #0077be);
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .skin-option:hover {
+            transform: scale(1.05);
+            border-color: #4ade80;
+        }
+
+        .skin-option.selected {
+            border-color: #4ade80;
+            box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.3);
+        }
+
+        /* Profile Dashboard */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #00a2e8, #0077be);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+
+        .profile-info h2 {
+            color: #00a2e8;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(0, 162, 232, 0.1);
+            border: 1px solid rgba(0, 162, 232, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4ade80;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-top: 0.5rem;
+        }
+
+        /* Jobs */
+        .jobs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .job-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(0, 162, 232, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .job-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 162, 232, 0.3);
+        }
+
+        .job-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 1rem;
+        }
+
+        .job-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #00a2e8;
+            margin-bottom: 0.5rem;
+        }
+
+        .job-salary {
+            color: #4ade80;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        /* Shop */
+        .shop-categories {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .category-btn {
+            padding: 8px 16px;
+            border: 1px solid rgba(0, 162, 232, 0.3);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .category-btn:hover,
+        .category-btn.active {
+            background: #00a2e8;
+            border-color: #00a2e8;
+        }
+
+        .shop-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .shop-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            border: 1px solid rgba(0, 162, 232, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .shop-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 162, 232, 0.3);
+        }
+
+        .item-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            background: linear-gradient(45deg, #00a2e8, #0077be);
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+        }
+
+        .item-price {
+            color: #4ade80;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .news-item {
+            padding: 1rem;
+            border-left: 4px solid #00a2e8;
+            background: rgba(0, 162, 232, 0.1);
+            border-radius: 0 8px 8px 0;
+        }
+
+        .news-date {
+            font-size: 12px;
+            color: #00a2e8;
+            margin-bottom: 0.5rem;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .rank {
+            background: #00a2e8;
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-container {
+                flex-wrap: wrap;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        /* Loading spinner */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Auth status */
+        .auth-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 20px;
+            background: rgba(0, 162, 232, 0.9);
+            color: white;
+            font-size: 14px;
+            z-index: 1000;
+        }
+    </style>
 </head>
-<body class="bg-gray-900 text-white font-sans">
-  <header class="bg-gray-800 p-4 shadow-md flex justify-between items-center">
-    <h1 class="text-2xl font-bold text-red-500">FenixZone RP SV1</h1>
-    <nav>
-      <a href="#" class="mx-2 hover:text-red-400">Inicio</a>
-      <a href="#" class="mx-2 hover:text-red-400">Mi Personaje</a>
-      <a href="#" class="mx-2 hover:text-red-400">Trabajos</a>
-      <a href="#" class="mx-2 hover:text-red-400">Estadísticas</a>
-      <a href="#" class="mx-2 hover:text-red-400">Soporte</a>
+<body>
+    <!-- Auth Status -->
+    <div id="authStatus" class="auth-status hidden">
+        <i class="fas fa-user"></i>
+        <span id="authStatusText">Invitado</span>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">FZ</div>
+                <div class="logo-text">
+                    <h1>FenixZone RolePlay</h1>
+                    <p>Servidor 1 - Roblox RP</p>
+                </div>
+            </div>
+            <div class="server-stats">
+                <div class="players-online">
+                    <i class="fas fa-users"></i>
+                    <span id="playersCount">247</span>/500
+                </div>
+                <div class="server-info">jugadores en línea</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="nav-tabs">
+        <div class="nav-container">
+            <button class="nav-tab active" data-page="home">
+                <i class="fas fa-home"></i> Inicio
+            </button>
+            <button class="nav-tab" data-page="register">
+                <i class="fas fa-user-plus"></i> Registro
+            </button>
+            <button class="nav-tab" data-page="login">
+                <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+            </button>
+            <button class="nav-tab" data-page="profile" id="profileTab" style="display: none;">
+                <i class="fas fa-user"></i> Mi Personaje
+            </button>
+            <button class="nav-tab" data-page="jobs">
+                <i class="fas fa-briefcase"></i> Trabajos
+            </button>
+            <button class="nav-tab" data-page="shop">
+                <i class="fas fa-shopping-cart"></i> Tienda
+            </button>
+        </div>
     </nav>
-  </header>
 
-  <main class="p-8">
-    <div id="auth-section" class="max-w-md mx-auto bg-gray-800 p-6 rounded-lg shadow-lg">
-      <h2 class="text-xl font-semibold mb-4">Iniciar sesión / Registrarse</h2>
-      <input id="email" type="email" placeholder="Correo electrónico" class="w-full mb-2 p-2 rounded bg-gray-700" />
-      <input id="password" type="password" placeholder="Contraseña" class="w-full mb-4 p-2 rounded bg-gray-700" />
-      <button onclick="login()" class="w-full bg-red-500 hover:bg-red-600 p-2 rounded">Iniciar Sesión</button>
-      <p class="text-center mt-2">o</p>
-      <button onclick="register()" class="w-full bg-gray-600 hover:bg-gray-700 p-2 mt-2 rounded">Registrarse</button>
-      <p id="auth-message" class="text-sm text-center mt-4 text-green-400"></p>
-    </div>
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content">
+            <!-- Home Page -->
+            <div id="home" class="page active">
+                <div class="hero-banner">
+                    <h2>¡Bienvenido a FenixZone RolePlay!</h2>
+                    <p>Vive una experiencia única de roleplay en Roblox con gráficos estilo Bloxburg</p>
+                    <div class="cta-buttons">
+                        <button class="btn btn-primary" onclick="showPage('register')">
+                            <i class="fas fa-play"></i> Comenzar a Jugar
+                        </button>
+                        <a href="https://www.roblox.com" class="btn btn-secondary" target="_blank">
+                            <i class="fab fa-roblox"></i> Ir al Juego
+                        </a>
+                    </div>
+                </div>
 
-    <div id="user-section" class="hidden max-w-md mx-auto bg-gray-800 p-6 mt-8 rounded-lg shadow-lg">
-      <h2 class="text-xl font-semibold mb-4">Bienvenido, <span id="user-email"></span></h2>
-      <p>Personaje: <strong>Nombre RP, Nivel 1</strong></p>
-      <p>Dinero: <strong>$500</strong></p>
-      <p>Trabajo: <strong>Sin empleo</strong></p>
-      <button onclick="logout()" class="w-full mt-4 bg-red-500 hover:bg-red-600 p-2 rounded">Cerrar sesión</button>
-    </div>
-  </main>
+                <div class="card">
+                    <h3><i class="fas fa-star"></i> Características del Servidor</h3>
+                    <div class="jobs-grid">
+                        <div class="job-card">
+                            <div class="job-icon"><i class="fas fa-home"></i></div>
+                            <div class="job-title">Sistema de Casas</div>
+                            <p>Compra y personaliza tu propia casa estilo Bloxburg</p>
+                        </div>
+                        <div class="job-card">
+                            <div class="job-icon"><i class="fas fa-car"></i></div>
+                            <div class="job-title">Vehículos</div>
+                            <p>Gran variedad de autos personalizables</p>
+                        </div>
+                        <div class="job-card">
+                            <div class="job-icon"><i class="fas fa-users"></i></div>
+                            <div class="job-title">Roleplay Social</div>
+                            <p>Interactúa con otros jugadores en un ambiente realista</p>
+                        </div>
+                        <div class="job-card">
+                            <div class="job-icon"><i class="fas fa-briefcase"></i></div>
+                            <div class="job-title">Sistema de Trabajos</div>
+                            <p>Desde delivery hasta supermercados</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Register Page -->
+            <div id="register" class="page">
+                <div class="card">
+                    <h3><i class="fas fa-user-plus"></i> Crear Cuenta</h3>
+                    <form id="registerForm">
+                        <div class="form-group">
+                            <label for="registerUsername">Nombre de Usuario</label>
+                            <input type="text" id="registerUsername" placeholder="Tu nombre en el juego" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerEmail">Correo Electrónico</label>
+                            <input type="email" id="registerEmail" placeholder="tu@email.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPassword">Contraseña</label>
+                            <input type="password" id="registerPassword" placeholder="Mínimo 6 caracteres" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerRobloxUser">Usuario de Roblox</label>
+                            <input type="text" id="registerRobloxUser" placeholder="Tu nombre en Roblox" required>
+                        </div>
+                        
+                        <h4 style="color: #00a2e8; margin: 2rem 0 1rem;">Personaliza tu Personaje</h4>
+                        <div class="character-preview">
+                            <div class="character-avatar" id="characterPreview">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="skin-selector">
+                            <div class="skin-option selected" data-skin="default">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="skin-option" data-skin="casual">
+                                <i class="fas fa-tshirt"></i>
+                            </div>
+                            <div class="skin-option" data-skin="formal">
+                                <i class="fas fa-user-tie"></i>
+                            </div>
+                            <div class="skin-option" data-skin="street">
+                                <i class="fas fa-user-ninja"></i>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+                            <i class="fas fa-user-plus"></i> <span id="registerBtnText">Crear Cuenta</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Login Page -->
+            <div id="login" class="page">
+                <div class="card">
+                    <h3><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</h3>
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="loginEmail">Correo Electrónico</label>
+                            <input type="email" id="loginEmail" placeholder="tu@email.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">Contraseña</label>
+                            <input type="password" id="loginPassword" placeholder="Tu contraseña" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            <span id="loginBtnText"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Profile Page -->
+            <div id="profile" class="page">
+                <div class="card">
+                    <div class="profile-header">
+                        <div class="profile-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="profile-info">
+                            <h2 id="profileName">Usuario</h2>
+                            <p>Miembro desde: <span id="profileJoinDate">Hoy</span></p>
+                            <p>Nivel: <span id="profileLevel">1</span></p>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-stats">
+                        <div class="stat-card">
+                            <div class="stat-value" id="profileMoney">$5,000</div>
+                            <div class="stat-label">Dinero</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="profileHours">0</div>
+                            <div class="stat-label">Horas Jugadas</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="profileJob">Desempleado</div>
+                            <div class="stat-label">Trabajo Actual</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="profileRep">0/100</div>
+                            <div class="stat-label">Reputación</div>
+                        </div>
+                    </div>
+
+                    <h4 style="color: #00a2e8; margin-bottom: 1rem;">Acciones Rápidas</h4>
+                    <div class="cta-buttons">
+                        <button class="btn btn-primary" onclick="showPage('shop')">
+                            <i class="fas fa-shopping-cart"></i> Ir a la Tienda
+                        </button>
+                        <button class="btn btn-secondary" onclick="showPage('jobs')">
+                            <i class="fas fa-briefcase"></i> Ver Trabajos
+                        </button>
+                        <button class="btn btn-secondary" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Jobs Page -->
+            <div id="jobs" class="page">
+                <div class="card">
+                    <h3><i class="fas fa-briefcase"></i> Trabajos Disponibles</h3>
+                    <div class="jobs-grid">
+                        <div class="job-card">
+                            <div class="job-icon"><i class="fas fa-truck"></i></div>
+                            <div class="job-title">Repartidor</div>
+                            <div class="job-salary">$250-400/hora</div>
+                            <p>Entrega paquetes por toda la ciudad. Ideal para principiantes.</p>
+                            <div style="margin-top: 1rem;">
+                                <span style="color: #4ade80;">✓ Sin requisitos</span>
+                            </div>
+                        </div>
+                        
+                        <div class="job-card">
+                            <div class="job-icon"><i class="fas fa-shopping-cart"></i></div>
+                            <div class="job-title">Cajero de Supermercado</div>
+                            <div class="job-salary">$300-500/hora</div>
+                            <p>Atiende clientes y maneja la caja registradora.</p>
+                            <div style="margin-top: 1rem;">
+                                <span style="color: #fbbf24;">⚠ Nivel 3 requerido</span>
+                            </div>
+                        </div>
+                        
+                        <div class="job-card">
+                            <div class="job-icon"><i class="fas fa-car"></i></div>
+                            <div class="job-title">Conductor de Uber</div>
+                            <div class="job-salary">$400-600/hora</div>
+                            <p>Transporta pasajeros por la ciudad con tu propio vehículo.</p>
+                            <div style="margin-top: 1rem;">
+                                <span style="color: #fbbf24;">⚠ Licencia de conducir</span>
+                            </div>
+                        </div>
+                        
+                        <div class="job-card">
+                            <div class="job-icon"><i class="fas fa-shield-alt"></i></div>
+                            <div class="job-title">Policía</div>
+                            <div class="job-salary">$800-1200/hora</div>
+                            <p>Mantén el orden y la seguridad en la ciudad.</p>
+                            <div style="margin-top: 1rem;">
+                                <span style="color: #ef4444;">✗ Nivel 10 requerido</span>
+                            </div>
+                        </div>
+                        
+                        <div class="job-card">
+                            <div class="job-icon"><i class="fas fa-wrench"></i></div>
+                            <div class="job-title">Mecánico</div>
+                            <div class="job-salary">$600-900/hora</div>
+                            <p>Repara vehículos de otros jugadores.</p>
+                            <div style="margin-top: 1rem;">
+                                <span style="color: #fbbf24;">⚠ Nivel 5 requerido</span>
+                            </div>
+                        </div>
+                        
+                        <div class="job-card">
+                            <div class="job-icon"><i class="fas fa-store"></i></div>
+                            <div class="job-title">Gerente de Tienda</div>
+                            <div class="job-salary">$1000-1500/hora</div>
+                            <p>Administra tu propia tienda y contrata empleados.</p>
+                            <div style="margin-top: 1rem;">
+                                <span style="color: #ef4444;">✗ Nivel 15 + $50,000</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shop Page -->
+            <div id="shop" class="page">
+                <div class="card">
+                    <h3><i class="fas fa-shopping-cart"></i> Tienda FenixZone</h3>
+                    
+                    <div class="shop-categories">
+                        <button class="category-btn active" data-category="clothing">
+                            <i class="fas fa-tshirt"></i> Ropa
+                        </button>
+                        <button class="category-btn" data-category="accessories">
+                            <i class="fas fa-glasses"></i> Accesorios
+                        </button>
+                        <button class="category-btn" data-category="vehicles">
+                            <i class="fas fa-car"></i> Vehículos
+                        </button>
+                        <button class="category-btn" data-category="houses">
+                            <i class="fas fa-home"></i> Casas
+                        </button>
+                    </div>
+                    
+                    <!-- Clothing Items -->
+                    <div id="clothing" class="shop-items">
+                        <div class="shop-item">
+                            <div class="item-image"><i class="fas fa-tshirt"></i></div>
+                            <h4>Camiseta Básica</h4>
+                            <div class="item-price">$500 FZ</div>
+                            <button class="btn btn-primary" style="margin-top: 0.5rem; width: 100%;">Comprar</button>
+                        </div>
+                        
+                        <div class="shop-item">
+                            <div class="item-image"><i class="fas fa-user-tie"></i></div>
+                            <h4>Traje Elegante</h4>
+                            <div class="item-price">$2,500 FZ</div>
+                            <button class="btn btn-primary" style="margin-top: 0.5rem; width: 100%;">Comprar</button>
+                        </div>
+                        
+                        <div class="shop-item">
+                            <div class="item-image"><i class="fas fa-crown"></i></div>
+                            <h4>Outfit Premium</h4>
+                            <div class="item-price">$5,000 FZ</div>
+                            <button class="btn btn-primary" style="margin-top: 0.5rem; width: 100%;">Comprar</button>
+                        </div>
+                        
+                        <div class="shop-item">
+                            <div class="item-image"><i class="fas fa-hat-cowboy"></i></div>
+                            <h4>Sombrero Vaquero</h4>
+                            <div class="item-price">$800 FZ</div>
+                            <button class="btn btn-primary" style="margin-top: 0.5rem; width: 100%;">Comprar</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Other categories (hidden by default) -->
+                    <div id="accessories" class="shop-items hidden">
+                        <div class="shop-item">
+                            <div class="item-image"><i class="fas fa-glasses"></i></div>
+                            <h4>Gafas de Sol</h4>
+                            <div class="item-price">$300 FZ</div>
+                            <button class="btn btn-primary" style="margin-top: 0.5rem; width: 100%;">Comprar</button>
+                        </div>
+                        
+                        <div class="shop-item">
+                            <div class="item-image"><i class="fas fa-watch"></i></div>
+                            <h4>Reloj Deportivo</h4>
+                            <div class="item-price">$1,200 FZ</div>
+                            <button class="btn btn-primary" style="margin-top: 0.5rem; width: 100%;">Comprar</button>
+                        </div>
+                    </div>
+                    
+                    <div id="vehicles" class="shop-items hidden">
+                        <div class="shop-item">
+                            <div class="item-image"><i class="fas fa-bicycle"></i></div>
+                            <h4>Bicicleta</h4>
+                            <div class="item-price">$2,000 FZ</div>
+                            <button class="btn btn-primary" style="margin-top: 0.5rem; width: 100%;">Comprar</button>
+                        </div>
+                        
+                        <div class="shop-item">
+                            <div class="item-image"><i class="fas fa-motorcycle"></i></div>
+                            <h4>Motocicleta</h4>
+                            <div class="item-price">$15,000 FZ</div>
+                            <button class="btn btn-primary" style="margin-top: 0.5rem; width: 100%;">Comprar</button>
+                        </div>
+                        
+                        <div class="shop-item">
+                            <div class="item-image"><i class="fas fa-car"></i></div>
+                            <h4>Auto Compacto</h4>
+                            <div class="item-price">$45,000 FZ</div>
+                            <button class="btn btn-primary" style="margin-top: 0.5rem; width: 100%;">Comprar</button>
+                        </div>
+                    </div>
+                    
+                    <div id="houses" class="shop-items hidden">
+                        <div class="shop-item">
+                            <div class="item-image"><i class="fas fa-home"></i></div>
+                            <h4>Casa Básica</h4>
+                            <div class="item-price">$100,000 FZ</div>
+                            <button class="btn btn-primary" style="margin-top: 0.5rem; width: 100%;">Comprar</button>
+                        </div>
+                        
+                        <div class="shop-item">
+                            <div class="item-image"><i class="fas fa-building"></i></div>
+                            <h4>Apartamento</h4>
+                            <div class="item-price">$250,000 FZ</div>
+                            <button class="btn btn-primary" style="margin-top: 0.5rem; width: 100%;">Comprar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <!-- Server Status -->
+            <div class="card">
+                <h3><i class="fas fa-server"></i> Estado del Servidor</h3>
+                <div class="leaderboard-item">
+                    <span>FenixZone SV1</span>
+                    <span style="color: #4ade80;">🟢 Online</span>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <p><strong>Última actualización:</strong></p>
+                    <p style="font-size: 12px; opacity: 0.8;">Sistema de supermercados añadido</p>
+                </div>
+            </div>
+
+            <!-- Top Players -->
+            <div class="card">
+                <h3><i class="fas fa-trophy"></i> Top Jugadores</h3>
+                <div class="leaderboard-item">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div class="rank">1</div>
+                        <span>ElProGamer23</span>
+                    </div>
+                    <span style="color: #4ade80;">Nivel 47</span>
+                </div>
+                <div class="leaderboard-item">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div class="rank">2</div>
+                        <span>RoleplayKing</span>
+                    </div>
+                    <span style="color: #4ade80;">Nivel 42</span>
+                </div>
+                <div class="leaderboard-item">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div class="rank">3</div>
+                        <span>BloxburgFan</span>
+                    </div>
+                    <span style="color: #4ade80;">Nivel 38</span>
+                </div>
+                <div class="leaderboard-item">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div class="rank">4</div>
+                        <span>SuperDelivery</span>
+                    </div>
+                    <span style="color: #4ade80;">Nivel 35</span>
+                </div>
+                <div class="leaderboard-item">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div class="rank">5</div>
+                        <span>CashierPro</span>
+                    </div>
+                    <span style="color: #4ade80;">Nivel 32</span>
+                </div>
+            </div>
+
+            <!-- Latest News -->
+            <div class="card">
+                <h3><i class="fas fa-newspaper"></i> Últimas Noticias</h3>
+                <div class="news-item">
+                    <div class="news-date">28 May 2025</div>
+                    <h4>Nuevo sistema de supermercados</h4>
+                    <p>Ya puedes trabajar como cajero o gerente de supermercado. ¡Gana hasta $1500/hora!</p>
+                </div>
+                <div class="news-item">
+                    <div class="news-date">25 May 2025</div>
+                    <h4>Evento de fin de semana</h4>
+                    <p>Doble XP y dinero todo el fin de semana. ¡No te lo pierdas!</p>
+                </div>
+                <div class="news-item">
+                    <div class="news-date">22 May 2025</div>
+                    <h4>Nuevos vehículos disponibles</h4>
+                    <p>Añadidos 5 nuevos modelos de autos en la tienda del juego.</p>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Firebase Configuration and Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-auth-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-firestore-compat.min.js"></script>
+
+    <script>
+        // Firebase Configuration (Replace with your config)
+        const firebaseConfig = {
+            apiKey: "your-api-key-here",
+            authDomain: "your-project.firebaseapp.com",
+            projectId: "your-project-id",
+            storageBucket: "your-project.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "your-app-id"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Global state
+        let currentUser = null;
+
+        // Navigation functionality
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Remove active class from all nav tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageId).classList.add('active');
+            
+            // Activate corresponding nav tab
+            const activeTab = document.querySelector(`[data-page="${pageId}"]`);
+            if (activeTab) {
+                activeTab.classList.add('active');
+            }
+        }
+
+        // Navigation event listeners
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                const pageId = e.target.closest('.nav-tab').getAttribute('data-page');
+                showPage(pageId);
+            });
+        });
+
+        // Character skin selection
+        document.querySelectorAll('.skin-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                document.querySelectorAll('.skin-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                e.target.classList.add('selected');
+            });
+        });
+
+        // Shop category switching
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const category = e.target.getAttribute('data-category');
+                
+                // Update button states
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                
+                // Show/hide items
+                document.querySelectorAll('.shop-items').forEach(items => {
+                    items.classList.add('hidden');
+                });
+                document.getElementById(category).classList.remove('hidden');
+            });
+        });
+
+        // Authentication functions
+        async function registerUser(email, password, username, robloxUser) {
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                
+                // Create user profile in Firestore
+                await db.collection('users').doc(user.uid).set({
+                    username: username,
+                    robloxUser: robloxUser,
+                    email: email,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    level: 1,
+                    money: 5000,
+                    hours: 0,
+                    job: 'Desempleado',
+                    reputation: 0
+                });
+                
+                await user.updateProfile({
+                    displayName: username
+                });
+                
+                showNotification('¡Cuenta creada exitosamente!', 'success');
+                showPage('profile');
+                
+            } catch (error) {
+                showNotification('Error: ' + error.message, 'error');
+            }
+        }
+
+        async function loginUser(email, password) {
+            try {
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                showNotification('¡Bienvenido de vuelta!', 'success');
+                showPage('profile');
+            } catch (error) {
+                showNotification('Error: ' + error.message, 'error');
+            }
+        }
+
+        async function logout() {
+            try {
+                await auth.signOut();
+                showNotification('Sesión cerrada', 'info');
+                showPage('home');
+            } catch (error) {
+                showNotification('Error al cerrar sesión', 'error');
+            }
+        }
+
+        // Form handlers
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('registerUsername').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const robloxUser = document.getElementById('registerRobloxUser').value;
+            
+            const submitBtn = document.getElementById('registerBtnText');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<div class="loading"></div> Creando cuenta...';
+            
+            await registerUser(email, password, username, robloxUser);
+            
+            submitBtn.innerHTML = originalText;
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            const submitBtn = document.getElementById('loginBtnText');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<div class="loading"></div> Iniciando sesión...';
+            
+            await loginUser(email, password);
+            
+            submitBtn.innerHTML = originalText;
+        });
+
+        // Auth state observer
+        auth.onAuthStateChanged(async (user) => {
+            currentUser = user;
+            const authStatus = document.getElementById('authStatus');
+            const authStatusText = document.getElementById('authStatusText');
+            const profileTab = document.getElementById('profileTab');
+            
+            if (user) {
+                // User is signed in
+                authStatus.classList.remove('hidden');
+                authStatusText.textContent = user.displayName || user.email;
+                profileTab.style.display = 'block';
+                
+                // Load user data
+                await loadUserProfile(user.uid);
+                
+            } else {
+                // User is signed out
+                authStatus.classList.add('hidden');
+                profileTab.style.display = 'none';
+                
+                // Reset profile data
+                document.getElementById('profileName').textContent = 'Usuario';
+                document.getElementById('profileMoney').textContent = '$5,000';
+                document.getElementById('profileLevel').textContent = '1';
+                document.getElementById('profileJob').textContent = 'Desempleado';
+            }
+        });
+
+        // Load user profile data
+        async function loadUserProfile(uid) {
+            try {
+                const doc = await db.collection('users').doc(uid).get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    document.getElementById('profileName').textContent = data.username;
+                    document.getElementById('profileMoney').textContent = `$${data.money.toLocaleString()}`;
+                    document.getElementById('profileLevel').textContent = data.level;
+                    document.getElementById('profileJob').textContent = data.job;
+                    document.getElementById('profileHours').textContent = data.hours;
+                    document.getElementById('profileRep').textContent = `${data.reputation}/100`;
+                    
+                    if (data.createdAt) {
+                        const joinDate = data.createdAt.toDate().toLocaleDateString('es-ES');
+                        document.getElementById('profileJoinDate').textContent = joinDate;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+            }
+        }
+
+        // Notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 8px;
+                color: white;
+                font-weight: 500;
+                z-index: 1001;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+                max-width: 300px;
+            `;
+            
+            switch (type) {
+                case 'success':
+                    notification.style.background = 'linear-gradient(45deg, #4ade80, #22c55e)';
+                    break;
+                case 'error':
+                    notification.style.background = 'linear-gradient(45deg, #ef4444, #dc2626)';
+                    break;
+                default:
+                    notification.style.background = 'linear-gradient(45deg, #00a2e8, #0077be)';
+            }
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // Remove after 4 seconds
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 4000);
+        }
+
+        // Simulate player count updates
+        function updatePlayerCount() {
+            const count = Math.floor(Math.random() * 50) + 200;
+            document.getElementById('playersCount').textContent = count;
+        }
+
+        // Update player count every 30 seconds
+        setInterval(updatePlayerCount, 30000);
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            showNotification('¡Bienvenido a FenixZone RolePlay SV1!', 'info');
+        });
+    </script>
 <script type="module" src="./firebase-init.js"></script>
 <script type="module" src="./auth.js"></script>
 </body>
 </html>
+
