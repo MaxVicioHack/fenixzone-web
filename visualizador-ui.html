@@ -1,105 +1,246 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Visualizador de UI Roblox</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    * {
-      font-family: 'Segoe UI', 'Gotham', sans-serif;
-    }
-  </style>
-</head>
-<body class="bg-neutral-900 text-white min-h-screen p-6 flex flex-col items-center">
+-- MyLife RP - Client UI Manager
+-- Coloca este script en StarterGui como LocalScript llamado "UIManager"
 
-  <h1 class="text-3xl font-bold mb-4">🧱 Visualizador UI Roblox</h1>
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
 
-  <div class="w-full max-w-5xl flex flex-col lg:flex-row gap-6">
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
 
-    <!-- Editor -->
-    <div class="w-full lg:w-1/2 flex flex-col bg-neutral-800 rounded-2xl p-4 shadow-xl">
-      <label for="luaCode" class="text-sm font-semibold mb-2">📄 Pega tu fragmento de UI Lua</label>
-      <textarea id="luaCode" rows="20" class="bg-neutral-900 text-white p-3 rounded-xl resize-none font-mono text-sm focus:outline-none focus:ring-2 ring-blue-500"></textarea>
-      <button onclick="renderPreview()" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-xl font-semibold">🔄 Visualizar</button>
-    </div>
+-- Esperar a que los RemoteEvents estén disponibles
+local moneyChangedEvent = ReplicatedStorage:WaitForChild("MoneyChanged")
+local levelUpEvent = ReplicatedStorage:WaitForChild("LevelUp")
+local getPlayerDataFunction = ReplicatedStorage:WaitForChild("GetPlayerData")
 
-    <!-- Vista previa -->
-    <div class="w-full lg:w-1/2 bg-neutral-800 rounded-2xl p-4 shadow-xl">
-      <p class="text-sm font-semibold mb-2">🖼️ Vista previa simulada</p>
-      <div id="previewArea" class="bg-neutral-700 p-4 rounded-xl h-[500px] relative overflow-auto">
-        <!-- Aquí se generan los elementos -->
-      </div>
-    </div>
+-- Crear la UI principal
+local function createMainUI()
+	-- ScreenGui principal
+	local screenGui = Instance.new("ScreenGui")
+	screenGui.Name = "MyLifeRP_UI"
+	screenGui.ResetOnSpawn = false
+	screenGui.Parent = playerGui
 
-  </div>
+	-- Frame principal (parte superior)
+	local mainFrame = Instance.new("Frame")
+	mainFrame.Name = "MainFrame"
+	mainFrame.Size = UDim2.new(0, 400, 0, 120)
+	mainFrame.Position = UDim2.new(0, 20, 0, 20)
+	mainFrame.BackgroundColor3 = Color3.new(0, 0, 0)
+	mainFrame.BackgroundTransparency = 0.3
+	mainFrame.BorderSizePixel = 0
+	mainFrame.Parent = screenGui
 
-  <script>
-    function parseUDim2(line) {
-      const match = line.match(/UDim2\.new\((\d+),\s*(\d+),\s*(\d+),\s*(\d+)\)/);
-      if (!match) return null;
-      return {
-        xScale: Number(match[1]), xOffset: Number(match[2]),
-        yScale: Number(match[3]), yOffset: Number(match[4])
-      };
-    }
+	-- Hacer esquinas redondeadas
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 10)
+	corner.Parent = mainFrame
 
-    function renderPreview() {
-      const preview = document.getElementById("previewArea");
-      const code = document.getElementById("luaCode").value;
-      preview.innerHTML = '';
+	-- Título del juego
+	local titleLabel = Instance.new("TextLabel")
+	titleLabel.Name = "TitleLabel"
+	titleLabel.Size = UDim2.new(1, 0, 0, 30)
+	titleLabel.Position = UDim2.new(0, 0, 0, 5)
+	titleLabel.BackgroundTransparency = 1
+	titleLabel.Text = "MyLife RP"
+	titleLabel.TextColor3 = Color3.new(0, 1, 1) -- Cyan
+	titleLabel.TextScaled = true
+	titleLabel.Font = Enum.Font.GothamBold
+	titleLabel.Parent = mainFrame
 
-      const lines = code.split('\n');
-      let currentElement = null;
+	-- Label de dinero
+	local moneyLabel = Instance.new("TextLabel")
+	moneyLabel.Name = "MoneyLabel"
+	moneyLabel.Size = UDim2.new(0.5, -10, 0, 25)
+	moneyLabel.Position = UDim2.new(0, 10, 0, 40)
+	moneyLabel.BackgroundTransparency = 1
+	moneyLabel.Text = "💰 $0"
+	moneyLabel.TextColor3 = Color3.new(0, 1, 0) -- Verde
+	moneyLabel.TextScaled = true
+	moneyLabel.Font = Enum.Font.Gotham
+	moneyLabel.Parent = mainFrame
 
-      lines.forEach((line, index) => {
-        line = line.trim();
-        
-        if (line.includes("Instance.new(\"Frame\")")) {
-          currentElement = document.createElement('div');
-          currentElement.className = "absolute bg-neutral-600 rounded-xl flex items-center justify-center text-white text-sm";
-          currentElement.innerText = `🧱 Frame (${index})`;
-          preview.appendChild(currentElement);
-        }
+	-- Label de nivel
+	local levelLabel = Instance.new("TextLabel")
+	levelLabel.Name = "LevelLabel"
+	levelLabel.Size = UDim2.new(0.5, -10, 0, 25)
+	levelLabel.Position = UDim2.new(0.5, 0, 0, 40)
+	levelLabel.BackgroundTransparency = 1
+	levelLabel.Text = "⭐ Nivel 1"
+	levelLabel.TextColor3 = Color3.new(1, 1, 0) -- Amarillo
+	levelLabel.TextScaled = true
+	levelLabel.Font = Enum.Font.Gotham
+	levelLabel.Parent = mainFrame
 
-        if (line.includes("Instance.new(\"TextLabel\")")) {
-          currentElement = document.createElement('div');
-          currentElement.className = "absolute bg-neutral-500 text-white text-xs rounded-md px-2 py-1 flex items-center";
-          currentElement.innerText = `📄 TextLabel (${index})`;
-          preview.appendChild(currentElement);
-        }
+	-- Barra de experiencia
+	local expBarFrame = Instance.new("Frame")
+	expBarFrame.Name = "ExpBarFrame"
+	expBarFrame.Size = UDim2.new(1, -20, 0, 20)
+	expBarFrame.Position = UDim2.new(0, 10, 0, 70)
+	expBarFrame.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+	expBarFrame.BorderSizePixel = 0
+	expBarFrame.Parent = mainFrame
 
-        if (line.startsWith("element.Size") && currentElement) {
-          const size = parseUDim2(line);
-          if (size) {
-            currentElement.style.width = `${size.xOffset}px`;
-            currentElement.style.height = `${size.yOffset}px`;
-          }
-        }
+	local expBarCorner = Instance.new("UICorner")
+	expBarCorner.CornerRadius = UDim.new(0, 5)
+	expBarCorner.Parent = expBarFrame
 
-        if (line.startsWith("element.Position") && currentElement) {
-          const pos = parseUDim2(line);
-          if (pos) {
-            currentElement.style.left = `${pos.xOffset}px`;
-            currentElement.style.top = `${pos.yOffset}px`;
-          }
-        }
+	-- Barra de experiencia (relleno)
+	local expBar = Instance.new("Frame")
+	expBar.Name = "ExpBar"
+	expBar.Size = UDim2.new(0, 0, 1, 0)
+	expBar.Position = UDim2.new(0, 0, 0, 0)
+	expBar.BackgroundColor3 = Color3.new(0, 0.7, 1) -- Azul
+	expBar.BorderSizePixel = 0
+	expBar.Parent = expBarFrame
 
-        if (line.includes("Text = ") && currentElement) {
-          const match = line.match(/Text\s*=\s*\"(.+?)\"/);
-          if (match) currentElement.innerText = match[1];
-        }
+	local expBarCorner2 = Instance.new("UICorner")
+	expBarCorner2.CornerRadius = UDim.new(0, 5)
+	expBarCorner2.Parent = expBar
 
-        if (line.includes("BackgroundColor3 = Color3.fromRGB") && currentElement) {
-          const match = line.match(/Color3\.fromRGB\((\d+),\s*(\d+),\s*(\d+)\)/);
-          if (match) {
-            const [_, r, g, b] = match;
-            currentElement.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
-          }
-        }
-      });
-    }
-  </script>
+	-- Label de experiencia
+	local expLabel = Instance.new("TextLabel")
+	expLabel.Name = "ExpLabel"
+	expLabel.Size = UDim2.new(1, 0, 1, 0)
+	expLabel.Position = UDim2.new(0, 0, 0, 0)
+	expLabel.BackgroundTransparency = 1
+	expLabel.Text = "0/100 EXP"
+	expLabel.TextColor3 = Color3.new(1, 1, 1)
+	expLabel.TextScaled = true
+	expLabel.Font = Enum.Font.Gotham
+	expLabel.Parent = expBarFrame
 
-</body>
-</html>
+	-- Label de trabajo actual
+	local jobLabel = Instance.new("TextLabel")
+	jobLabel.Name = "JobLabel"
+	jobLabel.Size = UDim2.new(1, -20, 0, 20)
+	jobLabel.Position = UDim2.new(0, 10, 0, 95)
+	jobLabel.BackgroundTransparency = 1
+	jobLabel.Text = "🎯 Sin trabajo activo"
+	jobLabel.TextColor3 = Color3.new(0.8, 0.8, 0.8)
+	jobLabel.TextScaled = true
+	jobLabel.Font = Enum.Font.Gotham
+	jobLabel.Parent = mainFrame
+
+	return screenGui
+end
+
+-- Crear notificación flotante
+local function createNotification(text, color, duration)
+	local notificationGui = Instance.new("ScreenGui")
+	notificationGui.Name = "Notification"
+	notificationGui.Parent = playerGui
+
+	local notification = Instance.new("Frame")
+	notification.Size = UDim2.new(0, 300, 0, 60)
+	notification.Position = UDim2.new(0.5, -150, 0, -70) -- Empezar fuera de pantalla
+	notification.BackgroundColor3 = color or Color3.new(0, 1, 0)
+	notification.BackgroundTransparency = 0.1
+	notification.BorderSizePixel = 0
+	notification.Parent = notificationGui
+
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 10)
+	corner.Parent = notification
+
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(1, -20, 1, 0)
+	label.Position = UDim2.new(0, 10, 0, 0)
+	label.BackgroundTransparency = 1
+	label.Text = text
+	label.TextColor3 = Color3.new(1, 1, 1)
+	label.TextScaled = true
+	label.Font = Enum.Font.GothamBold
+	label.Parent = notification
+
+	-- Animaciones
+	local tweenIn = TweenService:Create(notification, 
+		TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+		{Position = UDim2.new(0.5, -150, 0, 50)}
+	)
+
+	local tweenOut = TweenService:Create(notification,
+		TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In),
+		{Position = UDim2.new(0.5, -150, 0, -70)}
+	)
+
+	tweenIn:Play()
+
+	-- Eliminar después del tiempo especificado
+	game:GetService("Debris"):AddItem(notificationGui, duration or 3)
+
+	spawn(function()
+		wait((duration or 3) - 0.5)
+		tweenOut:Play()
+	end)
+end
+
+-- Actualizar UI con datos del jugador
+local function updateUI()
+	local ui = playerGui:FindFirstChild("MyLifeRP_UI")
+	if not ui then return end
+
+	local playerData = getPlayerDataFunction:InvokeServer()
+	if not playerData then return end
+
+	local mainFrame = ui:FindFirstChild("MainFrame")
+	if not mainFrame then return end
+
+	-- Actualizar dinero
+	local moneyLabel = mainFrame:FindFirstChild("MoneyLabel")
+	if moneyLabel then
+		moneyLabel.Text = "💰 $" .. tostring(playerData.Money)
+	end
+
+	-- Actualizar nivel
+	local levelLabel = mainFrame:FindFirstChild("LevelLabel")
+	if levelLabel then
+		levelLabel.Text = "⭐ Nivel " .. tostring(playerData.Level)
+	end
+
+	-- Actualizar experiencia
+	local expBar = mainFrame:FindFirstChild("ExpBarFrame"):FindFirstChild("ExpBar")
+	local expLabel = mainFrame:FindFirstChild("ExpBarFrame"):FindFirstChild("ExpLabel")
+	if expBar and expLabel then
+		local currentExp = playerData.Experience % 100
+		local expPercent = currentExp / 100
+
+		expBar:TweenSize(UDim2.new(expPercent, 0, 1, 0), "Out", "Quad", 0.5, true)
+		expLabel.Text = currentExp .. "/100 EXP"
+	end
+end
+
+-- Eventos del servidor
+moneyChangedEvent.OnClientEvent:Connect(function(amount, newTotal)
+	local color = amount > 0 and Color3.new(0, 1, 0) or Color3.new(1, 0, 0)
+	local prefix = amount > 0 and "+" or ""
+	createNotification("💰 " .. prefix .. "$" .. tostring(amount), color, 2)
+	updateUI()
+end)
+
+levelUpEvent.OnClientEvent:Connect(function(newLevel)
+	createNotification("🎉 ¡Nivel " .. tostring(newLevel) .. "!", Color3.new(1, 1, 0), 4)
+	updateUI()
+end)
+
+-- Inicializar UI cuando el jugador spawns
+player.CharacterAdded:Connect(function()
+	wait(2) -- Esperar a que todo esté listo
+
+	if not playerGui:FindFirstChild("MyLifeRP_UI") then
+		createMainUI()
+	end
+
+	updateUI()
+end)
+
+-- Si el jugador ya tiene personaje, inicializar inmediatamente
+if player.Character then
+	wait(2)
+	if not playerGui:FindFirstChild("MyLifeRP_UI") then
+		createMainUI()
+	end
+	updateUI()
+end
+
+print("🎨 MyLife RP UI Manager cargado!")
