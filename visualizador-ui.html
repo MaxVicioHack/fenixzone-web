@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Visualizador de UI Roblox</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * {
+      font-family: 'Segoe UI', 'Gotham', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-neutral-900 text-white min-h-screen p-6 flex flex-col items-center">
+
+  <h1 class="text-3xl font-bold mb-4">🧱 Visualizador UI Roblox</h1>
+
+  <div class="w-full max-w-5xl flex flex-col lg:flex-row gap-6">
+
+    <!-- Editor -->
+    <div class="w-full lg:w-1/2 flex flex-col bg-neutral-800 rounded-2xl p-4 shadow-xl">
+      <label for="luaCode" class="text-sm font-semibold mb-2">📄 Pega tu fragmento de UI Lua</label>
+      <textarea id="luaCode" rows="20" class="bg-neutral-900 text-white p-3 rounded-xl resize-none font-mono text-sm focus:outline-none focus:ring-2 ring-blue-500"></textarea>
+      <button onclick="renderPreview()" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-xl font-semibold">🔄 Visualizar</button>
+    </div>
+
+    <!-- Vista previa -->
+    <div class="w-full lg:w-1/2 bg-neutral-800 rounded-2xl p-4 shadow-xl">
+      <p class="text-sm font-semibold mb-2">🖼️ Vista previa simulada</p>
+      <div id="previewArea" class="bg-neutral-700 p-4 rounded-xl h-[500px] relative overflow-auto">
+        <!-- Aquí se generan los elementos -->
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function parseUDim2(line) {
+      const match = line.match(/UDim2\.new\((\d+),\s*(\d+),\s*(\d+),\s*(\d+)\)/);
+      if (!match) return null;
+      return {
+        xScale: Number(match[1]), xOffset: Number(match[2]),
+        yScale: Number(match[3]), yOffset: Number(match[4])
+      };
+    }
+
+    function renderPreview() {
+      const preview = document.getElementById("previewArea");
+      const code = document.getElementById("luaCode").value;
+      preview.innerHTML = '';
+
+      const lines = code.split('\n');
+      let currentElement = null;
+
+      lines.forEach((line, index) => {
+        line = line.trim();
+        
+        if (line.includes("Instance.new(\"Frame\")")) {
+          currentElement = document.createElement('div');
+          currentElement.className = "absolute bg-neutral-600 rounded-xl flex items-center justify-center text-white text-sm";
+          currentElement.innerText = `🧱 Frame (${index})`;
+          preview.appendChild(currentElement);
+        }
+
+        if (line.includes("Instance.new(\"TextLabel\")")) {
+          currentElement = document.createElement('div');
+          currentElement.className = "absolute bg-neutral-500 text-white text-xs rounded-md px-2 py-1 flex items-center";
+          currentElement.innerText = `📄 TextLabel (${index})`;
+          preview.appendChild(currentElement);
+        }
+
+        if (line.startsWith("element.Size") && currentElement) {
+          const size = parseUDim2(line);
+          if (size) {
+            currentElement.style.width = `${size.xOffset}px`;
+            currentElement.style.height = `${size.yOffset}px`;
+          }
+        }
+
+        if (line.startsWith("element.Position") && currentElement) {
+          const pos = parseUDim2(line);
+          if (pos) {
+            currentElement.style.left = `${pos.xOffset}px`;
+            currentElement.style.top = `${pos.yOffset}px`;
+          }
+        }
+
+        if (line.includes("Text = ") && currentElement) {
+          const match = line.match(/Text\s*=\s*\"(.+?)\"/);
+          if (match) currentElement.innerText = match[1];
+        }
+
+        if (line.includes("BackgroundColor3 = Color3.fromRGB") && currentElement) {
+          const match = line.match(/Color3\.fromRGB\((\d+),\s*(\d+),\s*(\d+)\)/);
+          if (match) {
+            const [_, r, g, b] = match;
+            currentElement.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+          }
+        }
+      });
+    }
+  </script>
+
+</body>
+</html>
